@@ -1,0 +1,72 @@
+
+#include <BleKeyboard.h>
+
+// ---------------------------
+// define pins/variables
+// ---------------------------
+int pins[9] = {4,5,6,7,8,9,3,20,21}; //{0,1,2,3,4,5,6,7,8}
+const int num_pins = 9;
+int layer = 1;
+
+// ---------------------------
+// initialise keyboard/bluetooth
+// ---------------------------
+BleKeyboard blekb("BLE MacroPad","CH", 100);
+
+// ---------------------------
+// create function to detect button presses
+// ---------------------------
+int bp(uint8_t button) {
+  static uint32_t lastStates = 0;
+  uint8_t state = digitalRead(button);
+  if (state != ((lastStates >> button) & 1)) {
+    lastStates ^= 1 << button;
+    return state == HIGH;
+  }
+  return false;
+}
+
+void setup(){                
+Serial.begin(9600);
+// ---------------------------
+// Set buttons as input 
+// ---------------------------
+for ( int i = 0; i < num_pins; i++){;
+  pinMode(pins[i], INPUT_PULLUP);
+  Serial.print(i);
+  Serial.print(" ");
+  Serial.println("initialised");
+}
+  blekb.begin();
+}
+
+void loop() {
+
+// ---------------------------
+// btn5(middle button) changes layers(1-3)
+// ---------------------------
+if(bp(pins[4])){
+    if( layer < 3){
+      layer++;
+    }
+    else{
+      layer = 1;
+    }
+}
+if(layer == 1){
+  //code
+  if(bp(pins[0])) {blekb.print("layer 1");}
+}
+
+if(layer == 2){
+
+  //if(bp(BTN7_PIN)) {blekb.write(KEY_PAGE_UP);}
+  if(bp(pins[0])) {blekb.print("layer 2");}
+}
+
+if(layer == 3){
+  //code 
+    if(bp(pins[0])) {blekb.print("layer 3");}
+}
+  delay(100);
+}
